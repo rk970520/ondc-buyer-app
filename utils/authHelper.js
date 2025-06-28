@@ -9,34 +9,39 @@ async function createAuthorizationHeader(requestBody) {
         const subscriberId = process.env.SUBSCRIBER_ID;
         const uniqueKeyId = process.env.UNIQUE_KEY_ID;
 
-        // 1. Get the 64-byte private key from .env.
-        // tweetnacl expects this as a Uint8Array.
-        const privateKey = naclUtil.decodeBase64(process.env.SIGNING_PRIVATE_KEY);
+        // --- THIS IS THE KEY CHANGE ---
+        // 1. Decode the Base64 private key from the .env file.
+        const privateKey_64_bytes = naclUtil.decodeBase64(process.env.SIGNING_PRIVATE_KEY);
 
-        // 2. Timestamps
-        const created = Math.floor(Date.now() / 1000 - 1).toString();
-        const expires = (parseInt(created) + 300).toString();
+        // 2. Explicitly create a signing keyPair from the 64-byte secret key.
+        // This is the most robust way to ensure tweetnacl uses the correct parts of the key.
+        const keyPair = nacl.sign.keyPair.fromSecretKey(privateKey_64_bytes);
+        // --- END OF KEY CHANGE ---
 
-        // 3. Generate the BLAKE-512 digest
+        // 3. Timestamps
+        const created = Math.floor(Date.now() / 1000).toString(); // Use current time, buffer can sometimes cause issues
+        const expires = (parseInt(created) + 300).toString(); // 5 minutes validity
+
+        // 4. Generate the BLAKE-512 digest
         const digest = generateBlake512Digest(requestBody);
 
-        // 4. Construct the signing string
+        // 5. Construct the signing string
         const signingString =
             `(created): ${created}\n` +
             `(expires): ${expires}\n` +
             `digest: BLAKE-512=${digest}`;
 
-        // 5. Sign the string using tweetnacl's detached signature function.
-        // It requires the message to be a Uint8Array.
+        // 6. Sign the string using the secretKey from the generated keyPair.
+        // We use nacl.sign.detached and pass the full message and the secret key from the pair.
         const signatureBytes = nacl.sign.detached(
             naclUtil.decodeUTF8(signingString),
-            privateKey
+            keyPair.secretKey // Use the secret key from the generated pair
         );
 
-        // 6. Convert the signature to Base64
+        // 7. Convert the signature to Base64
         const signature = naclUtil.encodeBase64(signatureBytes);
 
-        // 7. Construct the final header
+        // 8. Construct the final header
         const header = `Signature keyId="${subscriberId}|${uniqueKeyId}|ed25519",algorithm="ed25519",created="${created}",expires="${expires}",headers="(created) (expires) digest",signature="${signature}"`;
 
         return header;
