@@ -1,7 +1,7 @@
 const express = require('express');
 const axios = require('axios');
 const { v4: uuidv4 } = require('uuid');
-const { createAuthorizationHeader } = require('../utils/authHelper');
+const { createAuthorizationHeaderONDC } = require('../utils/authHelper');
 const SearchResult = require('../models/SearchResult');
 
 const router = express.Router();
@@ -54,7 +54,7 @@ router.post('/search', async (req, res) => {
 
     try {
         console.log("Initiating search with payload:", JSON.stringify(searchPayload));
-        const authHeader = await createAuthorizationHeader(searchPayload);
+        const authHeader = await createAuthorizationHeaderONDC(searchPayload);
         
         console.log("Using Auth Header:", authHeader);
 
