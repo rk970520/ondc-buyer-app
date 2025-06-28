@@ -7,18 +7,20 @@ const {createAuthorizationHeader} = require("ondc-crypto-sdk-nodejs");
 
 async function createAuthorizationHeaderONDC(requestBody) {
     try {
-        console.log({
-            body: requestBody,
-            privateKey: process.env.SIGNING_PRIVATE_KEY,
-            subscriberId: process.env.SUBSCRIBER_ID, // Subscriber ID that you get after registering to ONDC Network
-            subscriberUniqueKeyId: process.env.UNIQUE_KEY_ID, // Unique Key Id or uKid that you get after registering to ONDC Network
-        });
+       
         const header = await createAuthorizationHeader({
             body: requestBody,
             privateKey: process.env.SIGNING_PRIVATE_KEY,
             subscriberId: process.env.SUBSCRIBER_ID, // Subscriber ID that you get after registering to ONDC Network
             subscriberUniqueKeyId: process.env.UNIQUE_KEY_ID, // Unique Key Id or uKid that you get after registering to ONDC Network
         });
+
+         console.log({
+            body: requestBody,
+            privateKey: process.env.SIGNING_PRIVATE_KEY,
+            subscriberId: process.env.SUBSCRIBER_ID, // Subscriber ID that you get after registering to ONDC Network
+            subscriberUniqueKeyId: process.env.UNIQUE_KEY_ID, // Unique Key Id or uKid that you get after registering to ONDC Network
+        },header);
         // const subscriberId = process.env.SUBSCRIBER_ID;
         // const uniqueKeyId = process.env.UNIQUE_KEY_ID;
 
