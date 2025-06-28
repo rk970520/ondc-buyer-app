@@ -31,6 +31,6 @@ app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
     console.log(`ONDC callbacks are expected at: ${process.env.BAP_URL}/[action]`);
     if(!process.env.BAP_URL || !process.env.BAP_URL.startsWith('https://')){
-        console.warn('WARNING: BAP_URL is not set or is not a valid HTTPS URL. ONDC callbacks will fail.');
+        console.warn('WARNING: BAP_URL is not set or is not a valid HTTPS URL. ONDC callbacks will fail.');``
     }
 });
