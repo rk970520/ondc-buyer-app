@@ -1,36 +1,38 @@
+// server.js
 require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
-const ondcRoutes = require('./routes/ondcRoutes');
+const connectDB = require('./config/db');
+const clientRoutes = require('./routes/clientRoutes');
+const protocolRoutes = require('./routes/protocolRoutes');
+
+// Connect to Database
+connectDB();
 
 const app = express();
-const PORT = process.env.PORT || 3200;
 
 // Middleware
-const corsOptions = {
-    origin: '*' // Be more specific in production e.g., 'https://your-frontend-domain.com'
-};
-app.use(cors(corsOptions));
+app.use(cors());
 app.use(express.json());
 
-// DB Connection
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(() => console.log('MongoDB connected...'))
-    .catch(err => console.error('MongoDB connection error:', err));
-
-// Mount the ONDC routes at the /ondc path to match your subscriber_url
-app.use('/ondc', ondcRoutes);
-
-// Root endpoint for health check
-app.get('/', (req, res) => {
-    res.send('ONDC Buyer App Backend is running!');
+// Log requests for debugging
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+    if (Object.keys(req.body).length > 0) {
+        console.log('Request Body:', JSON.stringify(req.body, null, 2));
+    }
+    next();
 });
 
+// Mount Routers
+app.use('/client/v1', clientRoutes); // For your frontend to call
+app.use('/', protocolRoutes);       // For ONDC Gateway to call (root path as per BAP_URL)
+
+// Health check
+app.get('/health', (req, res) => res.status(200).send('OK'));
+
+const PORT = process.env.PORT || 4434;
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-    console.log(`ONDC callbacks are expected at: ${process.env.BAP_URL}/[action]`);
-    if(!process.env.BAP_URL || !process.env.BAP_URL.startsWith('https://')){
-        console.warn('WARNING: BAP_URL is not set or is not a valid HTTPS URL. ONDC callbacks will fail.');``
-    }
+    console.log(`Server running on port ${PORT}`);
+    console.log(`BAP URL is configured as: ${process.env.BAP_URL}`);
 });

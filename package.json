@@ -11,17 +11,18 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^1.10.0",
+    "body-parser": "^2.2.0",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "dotenv": "^16.6.1",
     "express": "^4.21.2",
-    "mongoose": "^8.16.1",
+    "mongoose": "^8.16.4",
     "ondc-crypto-sdk-nodejs": "^2.1.1",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "nodemon": "^3.0.2"
+    "nodemon": "^3.1.10"
   }
 }
